@@ -1,25 +1,33 @@
 # backend/main.py
+
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
-from .roles import UserRole
 
+from .roles import UserRole
 from . import models, schemas, auth
 from .database import engine, get_db
 
-# Crea las tablas en la base de datos (si no existen)
+# Carga las variables de entorno desde el archivo .env
+load_dotenv()
+
+# Crea las tablas en la base de datos si no existen
+# Nota: En un entorno de producción más avanzado, se usarían herramientas de migración como Alembic.
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 # --- Configuración de CORS ---
-origins = [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    "http://localhost:3000",
-]
+# Carga los orígenes permitidos desde una variable de entorno para flexibilidad en el despliegue.
+# Proporciona un valor por defecto para el desarrollo local si la variable no está definida.
+FRONTEND_ORIGINS = os.getenv("FRONTEND_ORIGINS", "http://localhost:3000")
+
+# La variable de entorno puede contener múltiples URLs separadas por comas.
+origins = [origin.strip() for origin in FRONTEND_ORIGINS.split(',')]
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +57,11 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
 # Endpoint para crear un usuario (ej. para un admin o para registro inicial)
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Opcional: Verificar si el usuario ya existe
+    db_user_exists = db.query(models.User).filter(models.User.username == user.username).first()
+    if db_user_exists:
+        raise HTTPException(status_code=400, detail="Username already registered")
+        
     hashed_password = auth.get_password_hash(user.password)
     # Almacenamos el valor del enum (el string) en la base de datos
     db_user = models.User(username=user.username, hashed_password=hashed_password, role=user.role.value)
@@ -57,7 +70,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-# Nuevo endpoint para estudiantes
+# Endpoint para estudiantes para ver sus propias calificaciones
 @app.get("/my-grades/", response_model=List[schemas.Grade])
 def read_my_grades(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     # Asumimos que el student_name en la tabla de notas coincide con el username del estudiante
