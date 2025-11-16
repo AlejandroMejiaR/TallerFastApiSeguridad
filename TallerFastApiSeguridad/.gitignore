@@ -67,7 +67,7 @@ yarn-error.log*
 .scannerwork/
 
 # Ignora los informes de seguridad generados en HTML.
-Pruebas1
+Pruebas1/
 sonar-project.properties
 bearer-report.html
 ZAP-Report.html
