@@ -16,7 +16,7 @@ function decodeToken(token) {
         // atob está depreciado en Node.js pero funciona en navegadores. Para compatibilidad universal se puede usar Buffer.
         return JSON.parse(atob(token.split('.')[1]));
     } catch (e) {
-        console.error("Error decoding token:", e);
+        console.error("Error decoding token:", e.message);
         return null;
     }
 }
@@ -42,8 +42,10 @@ export default function DashboardPage() {
         }
 
         const decoded = decodeToken(token);
-        if (decoded && decoded.role) {
-            setUserRole(decoded.role); // Guardamos el rol
+        const role = decoded?.role; // <-- Usando encadenamiento opcional
+
+        if (role) {
+            setUserRole(role);
         } else {
             // Si el token es inválido o no tiene rol, deslogueamos
             localStorage.removeItem('accessToken');
@@ -101,7 +103,7 @@ export default function DashboardPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ student_name: studentName, subject, score: parseFloat(score) })
+                body: JSON.stringify({ student_name: studentName, subject, score: Number.parseFloat(score) })
             });
             if (!response.ok) {
                 const errorData = await response.json();
@@ -168,13 +170,16 @@ export default function DashboardPage() {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {loading ? (
+                                    {loading && (
                                         <TableRow><TableCell colSpan={4} align="center"><CircularProgress /></TableCell></TableRow>
-                                    ) : error ? (
+                                    )}
+                                    {!loading && error && (
                                         <TableRow><TableCell colSpan={4}><Alert severity="error">{error}</Alert></TableCell></TableRow>
-                                    ) : grades.length === 0 ? (
+                                    )}
+                                    {!loading && !error && grades.length === 0 && (
                                         <TableRow><TableCell colSpan={4} align="center">No hay calificaciones para mostrar.</TableCell></TableRow>
-                                    ) : (
+                                    )}
+                                    {!loading && !error && grades.length > 0 && (
                                         grades.map((grade) => (
                                             <TableRow key={grade.id}>
                                                 <TableCell>{grade.student_name}</TableCell>
@@ -182,8 +187,8 @@ export default function DashboardPage() {
                                                 <TableCell align="right">{grade.score.toFixed(1)}</TableCell>
                                                 {userRole === 'profesor' && (
                                                     <TableCell align="center">
-                                                        <IconButton size="small" onClick={() => alert(`Funcionalidad Editar Próximamente`)}><Edit /></IconButton>
-                                                        <IconButton size="small" onClick={() => alert(`Funcionalidad Eliminar Próximamente`)}><Delete /></IconButton>
+                                                        <IconButton size="small" onClick={() => alert(`Funcionalidad Editar Próximamente`)}><EditIcon /></IconButton>
+                                                        <IconButton size="small" onClick={() => alert(`Funcionalidad Eliminar Próximamente`)}><DeleteIcon /></IconButton>
                                                     </TableCell>
                                                 )}
                                             </TableRow>

@@ -1,6 +1,6 @@
 # backend/schemas.py
 from pydantic import BaseModel, Field
-from .roles import UserRole
+from roles import UserRole
 
 # Schema para la creación de calificaciones
 class GradeCreate(BaseModel):

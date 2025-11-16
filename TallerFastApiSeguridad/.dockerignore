@@ -1,0 +1,19 @@
+# .dockerignore (en la raíz del proyecto)
+
+# Archivos de Git y configuración local
+.git
+.gitignore
+.env
+.idea
+.vscode
+*.pem
+README.md
+
+# Ignorar para el contexto del backend
+backend/venv
+backend/__pycache__
+
+# Ignorar para el contexto del frontend
+frontend/node_modules
+frontend/.next
+frontend/build

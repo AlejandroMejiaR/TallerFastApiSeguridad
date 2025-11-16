@@ -1,0 +1,36 @@
+# La línea 'version' es opcional en las versiones modernas de Docker Compose
+# version: '3.8'
+
+services:
+  # Servicio del Backend (FastAPI)
+  backend:
+    build: ./backend
+    container_name: fast_api_backend
+    env_file:
+      - .env
+
+  # Servicio del Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Pasa la variable como un argumento de construcción a frontend/Dockerfile
+        NEXT_PUBLIC_API_URL: /api
+    container_name: next_js_frontend
+    depends_on:
+      - backend
+    # También es una buena práctica definirla aquí por si se necesita en tiempo de ejecución
+    environment:
+      - NEXT_PUBLIC_API_URL=/api
+
+  # Servicio del Reverse Proxy (Nginx)
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx_reverse_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - frontend

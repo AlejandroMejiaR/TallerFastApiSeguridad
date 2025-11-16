@@ -8,9 +8,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
 
-from .roles import UserRole
-from . import models, schemas, auth
-from .database import engine, get_db
+from roles import UserRole
+from database import engine, get_db
+import models, schemas, auth
 
 # Carga las variables de entorno desde el archivo .env
 load_dotenv()
@@ -19,7 +19,10 @@ load_dotenv()
 # Nota: En un entorno de producción más avanzado, se usarían herramientas de migración como Alembic.
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+# backend/main.py
+app = FastAPI(
+    root_path="/api"
+)
 
 # --- Configuración de CORS ---
 # Carga los orígenes permitidos desde una variable de entorno para flexibilidad en el despliegue.
