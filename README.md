@@ -10,17 +10,17 @@ La aplicación fue desplegada en AWS y se puede acceder en vivo en: **[https://m
 
 A continuación se presentan las vistas principales de la aplicación.
 
-![Página de Login](images/1.png)
+![Página de Login](Images/1.png)
 _Página de inicio de sesión de la aplicación._
 
 <br/>
 
-![Vista del Profesor](images/2.png)
+![Vista del Profesor](Images/2.png)
 _Dashboard del profesor, con formulario para añadir/actualizar notas y el listado de calificaciones creadas._
 
 <br/>
 
-![Vista del Estudiante](images/3.png)
+![Vista del Estudiante](Images/3.png)
 _Dashboard del estudiante, mostrando únicamente las calificaciones asociadas a su perfil._
 
 ---
